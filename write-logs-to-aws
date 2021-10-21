@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+"""
+AWS CloudWatch Logs の指定のロググループ＆ログストリームにログを出力する
+@example
+    ./write-logs-to-aws log_group log_stream log_message
+    ./write-logs-to-aws '/aws/some-system' 'sample-stream' 'hello-world'
+    ログメッセージをファイルで指定する場合
+    ./write-logs-to-aws '/aws/some-system' 'sample-stream' -f './log.txt'
+"""
+
+import watchtower
+import logging
+import sys
+import pathlib
+
+
+def save_log(msg: str, log_group: str = 'aws-cloud-watch-logs', stream_name: str = None):
+    """
+    AWS CloudWatch Logs の指定のロググループ＆ログストリームにログを出力する
+    :param msg: ログメッセージ
+    :param log_group: ロググループ名
+    :param stream_name: ログストリーム名
+    """
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger('aws-cloud-watch-logs')
+    logger.addHandler(
+        watchtower.CloudWatchLogHandler(
+            log_group=log_group,
+            stream_name=stream_name
+        )
+    )
+    logger.debug(msg)
+
+if __name__ == '__main__':
+    if sys.argv[3] == '-f':
+        save_log(pathlib.Path(sys.argv[4]).read_text(), sys.argv[1], sys.argv[2])
+    else:
+        save_log(sys.argv[3], sys.argv[1], sys.argv[2])
